@@ -1,30 +1,29 @@
 const { getByName } = require("../service/user.service");
-const { md5password } = require("../util/password-handle");
 const {
   NAME_OR_PASSWORD_IS_REQUIRED,
-  USER_ALREADY_EXISTS,
+  USER_DOES_NOT_EXISTS,
+  PASSWORD_IS_INCORRENT,
 } = require("../constants/error-types");
-const verifyUser = async (ctx, next) => {
+const { md5password } = require("../util/password-handle");
+const verifyLogin = async (ctx, next) => {
   const { name, password } = ctx.request.body;
   if (!name || !password) {
     const error = new Error(NAME_OR_PASSWORD_IS_REQUIRED);
     return ctx.app.emit("error", error, ctx);
   }
   const result = await getByName(name);
-  if (result.length > 0) {
-    const error = new Error(USER_ALREADY_EXISTS);
+  const user = result[0];
+  if (!user) {
+    const error = new Error(USER_DOES_NOT_EXISTS);
+    return ctx.app.emit("error", error, ctx);
+  }
+  if (md5password(password) != user.password) {
+    const error = new Error(PASSWORD_IS_INCORRENT);
     return ctx.app.emit("error", error, ctx);
   }
   await next();
 };
 
-const handlePassword = async (ctx, next) => {
-  let { password } = ctx.request.body;
-  ctx.request.body.password = md5password(password);
-  await next();
-};
-
 module.exports = {
-  verifyUser,
-  handlePassword,
+  verifyLogin,
 };
