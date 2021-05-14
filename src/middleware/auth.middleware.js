@@ -6,7 +6,7 @@ const {
   NAME_OR_PASSWORD_IS_REQUIRED,
   USER_DOES_NOT_EXISTS,
   PASSWORD_IS_INCORRENT,
-  UNAUTHORIZATION
+  UNAUTHORIZATION,
 } = require("../constants/error-types");
 const { md5password } = require("../util/password-handle");
 
@@ -33,8 +33,12 @@ const verifyLogin = async (ctx, next) => {
 };
 
 const verifyAuth = async (ctx, next) => {
-  console.log("verifyAuth middleware");
   const authorization = ctx.headers.authorization;
+  if (!authorization) {
+    const error = new Error(UNAUTHORIZATION);
+    return ctx.app.emit("error", error, ctx);
+  }
+
   const token = authorization.replace("Bearer ", "");
   try {
     const result = jwt.verify(token, PUBLIC_KEY, {
@@ -43,8 +47,9 @@ const verifyAuth = async (ctx, next) => {
     ctx.user = result;
     await next();
   } catch (err) {
-    const error = new Error(UNAUTHORIZATION)
-    ctx.app.emit('error', error, ctx)
+    console.log(err);
+    const error = new Error(UNAUTHORIZATION);
+    ctx.app.emit("error", error, ctx);
   }
 };
 
