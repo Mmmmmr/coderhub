@@ -17,10 +17,21 @@ class MomentController {
   }
 
   async list(ctx, next) {
-    console.log(111);
-
     const { offset, size } = ctx.query;
     const result = await momentService.getMomentList(offset, size);
+    ctx.body = result;
+  }
+
+  async update(ctx, next) {
+    const { momentId } = ctx.params;
+    const { content } = ctx.request.body;
+    const result = await momentService.update(content, momentId);
+    ctx.body = result;
+  }
+
+  async remove(ctx, next) {
+    const { momentId } = ctx.params;
+    const result = await momentService.remove(momentId);
     ctx.body = result;
   }
 }

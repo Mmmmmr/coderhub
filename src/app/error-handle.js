@@ -4,6 +4,7 @@ const {
   USER_DOES_NOT_EXISTS,
   PASSWORD_IS_INCORRENT,
   UNAUTHORIZATION,
+  UNPERMISSION,
 } = require("../constants/error-types");
 
 const errorHandle = (err, ctx) => {
@@ -28,6 +29,10 @@ const errorHandle = (err, ctx) => {
     case UNAUTHORIZATION:
       status = 401;
       message = "无效token";
+      break;
+    case UNPERMISSION:
+      status = 403;
+      message = "未授权操作";
       break;
     default:
       status = 404;

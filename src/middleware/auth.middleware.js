@@ -1,12 +1,14 @@
-const { getByName } = require("../service/user.service");
 const jwt = require("jsonwebtoken");
 
+const { getByName } = require("../service/user.service");
+const { checkMoment } = require("../service/auth.service");
 const { PUBLIC_KEY } = require("../app/config");
 const {
   NAME_OR_PASSWORD_IS_REQUIRED,
   USER_DOES_NOT_EXISTS,
   PASSWORD_IS_INCORRENT,
   UNAUTHORIZATION,
+  UNPERMISSION,
 } = require("../constants/error-types");
 const { md5password } = require("../util/password-handle");
 
@@ -53,7 +55,23 @@ const verifyAuth = async (ctx, next) => {
   }
 };
 
+const verifyPermisson = async (ctx, next) => {
+  const { momentId } = ctx.params;
+  const { id } = ctx.user;
+  try {
+    const isPermission = await checkMoment(momentId, id);
+    console.log(id);
+    if (!isPermission) throw new Error();
+  } catch (error) {
+    const err = new Error(UNPERMISSION);
+    return ctx.app.emit("error", err, ctx);
+  }
+
+  await next();
+};
+
 module.exports = {
   verifyLogin,
   verifyAuth,
+  verifyPermisson,
 };
