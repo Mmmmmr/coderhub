@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 const { getByName } = require("../service/user.service");
-const { checkMoment } = require("../service/auth.service");
+const { checkResource } = require("../service/auth.service");
 const { PUBLIC_KEY } = require("../app/config");
 const {
   NAME_OR_PASSWORD_IS_REQUIRED,
@@ -56,13 +56,15 @@ const verifyAuth = async (ctx, next) => {
 };
 
 const verifyPermisson = async (ctx, next) => {
-  const { momentId } = ctx.params;
+  const [resourceKey] = Object.keys(ctx.params);
+  const tableName = resourceKey.replace("Id", "");
+  const resourceId = ctx.params[resourceKey];
   const { id } = ctx.user;
   try {
-    const isPermission = await checkMoment(momentId, id);
-    console.log(id);
+    const isPermission = await checkResource(tableName, resourceId, id);
     if (!isPermission) throw new Error();
   } catch (error) {
+    console.log(error);
     const err = new Error(UNPERMISSION);
     return ctx.app.emit("error", err, ctx);
   }
