@@ -11,6 +11,7 @@ const PUBLIC_KEY = fs.readFileSync(
 );
 module.exports = {
   APP_PORT,
+  APP_HOST,
   MYSQL_HOST,
   MYSQL_PORT,
   MYSQL_DATABASE,
